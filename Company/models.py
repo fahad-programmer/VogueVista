@@ -1,6 +1,8 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from django.dispatch import receiver
+from django.db.models.signals import post_save, post_delete
 
 def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
@@ -16,7 +18,12 @@ class CompanyProfile(models.Model):
 
     def __str__(self):
         return self.company_name
-
+    
+    @receiver(post_save, sender=User)
+    def CreateCompanyProfile(sender, instance, created, **kwargs):
+            """Automatically creates an instance if a object is created"""
+            if created:
+                CompanyProfile.objects.create(user=instance)
 
 class Job(models.Model):
     # Job types can be defined as a tuple of tuples, where the first value in each tuple is the value to be stored in the database and the second value is the human-readable name
