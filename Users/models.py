@@ -1,9 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
-from django.dispatch import receiver
 from django.utils import timezone
 from Company.models import Job
-from django.db.models.signals import post_save, post_delete
 
 
 # If you're using a custom user model, replace 'User' with your custom model.
@@ -21,12 +19,6 @@ class UserProfile(models.Model):
 
     def __str__(self):
         return self.user.username
-    
-    @receiver(post_save, sender=User)
-    def CreateCompanyProfile(sender, instance, created, **kwargs):
-            """Automatically creates an instance if a object is created"""
-            if created:
-                UserProfile.objects.create(user=instance)
 
     # Additional methods can be added here. For example, calculating the user's age.
     def age(self):
