@@ -52,3 +52,5 @@ class Job(models.Model):
             return "Posted today"
         else:
             return f"Posted {delta.days} days ago"
+        
+

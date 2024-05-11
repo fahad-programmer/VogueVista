@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     "Users",
     "Company",
+    "Auth",
 
     "rest_framework",
     'django_cleanup.apps.CleanupConfig',
