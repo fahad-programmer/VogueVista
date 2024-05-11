@@ -1,6 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
+
+
+class VerificationSerializer(serializers.Serializer):
+    code = serializers.CharField()
+    email = serializers.EmailField()
+
 class SignupSerializer(serializers.ModelSerializer):
     password = serializers.CharField(write_only=True)
     type = serializers.CharField(write_only=True)  # Add the 'type' field here
