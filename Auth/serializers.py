@@ -1,7 +1,12 @@
 from rest_framework import serializers
 from django.contrib.auth.models import User
 
+class ResendEmailSerializer(serializers.Serializer):
+    email = serializers.EmailField()
 
+class UserLoginSerializer(serializers.Serializer):
+    username = serializers.CharField()
+    password = serializers.CharField()
 
 class VerificationSerializer(serializers.Serializer):
     code = serializers.CharField()

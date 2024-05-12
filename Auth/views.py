@@ -1,5 +1,5 @@
 from Auth.models import UserVerification
-from .serializers import SignupSerializer, VerificationSerializer
+from .serializers import ResendEmailSerializer, SignupSerializer, UserLoginSerializer, VerificationSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response
@@ -9,6 +9,7 @@ from Users.models import UserProfile
 from django.core.mail import send_mail
 import random
 from rest_framework.authtoken.models import Token
+from rest_framework.authentication import TokenAuthentication
 
 # Create your views here.
 class SignupApi(APIView):
@@ -33,8 +34,8 @@ class SignupApi(APIView):
                 return Response({"error": "Email already exists"}, status=status.HTTP_400_BAD_REQUEST)
             serializer.save()
 
-            # Generate a random 6-digit number
-            verification_code = random.randrange(100000, 999999)
+            # Generate a random 4-digit number
+            verification_code = random.randrange(1000, 9999)
 
             # Create the user object with not active status
             set_user_nonactive = User.objects.get(email=email)
@@ -90,7 +91,7 @@ class VerifyCodeApi(APIView):
         """
         serializer = VerificationSerializer(data=request.data)
         if serializer.is_valid():
-            verification_code = serializer.validated_data.get('verification_code')  # Corrected 'code' to 'verification_code'
+            verification_code = serializer.validated_data.get('code')  # Corrected 'code' to 'verification_code'
             email = serializer.validated_data.get('email')
 
             try:
@@ -112,4 +113,75 @@ class VerifyCodeApi(APIView):
                 return Response({"error": "User not found."}, status=status.HTTP_404_NOT_FOUND)
             except UserVerification.DoesNotExist:
                 return Response({"error": "User verification not found."}, status=status.HTTP_404_NOT_FOUND)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+
+class CheckUserActive(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        user = request.user
+        if user.is_active:
+            return Response({"success": "User is active"}, status=status.HTTP_200_OK)
+   
+
+
+class ResendVerificationEmail(APIView):
+    def post(self, request):
+
+        serializer = ResendEmailSerializer(data=request.data)
+        if serializer.is_valid():
+            email = request.data.get('email')
+            try:
+                user = User.objects.get(email=email)
+            except User.DoesNotExist:
+                return Response({"error": "User not found"}, status=status.HTTP_404_NOT_FOUND)
+
+            if user.is_active:
+                return Response({"error": "User is already active"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Generate a new verification code
+            verification_code = random.randint(1000, 9999)
+
+            # Update the verification code for the user
+            user_verification, created = UserVerification.objects.get_or_create(user=user)
+            user_verification.verification_code = verification_code
+            user_verification.save()
+
+            # Send the email with the new verification code
+            send_mail(
+                'Email Verification Code',
+                f'Your new verification code is: {verification_code}',
+                'vogue-vista@gmail.com',
+                [email],
+                fail_silently=False,
+            )
+        return Response({"Success": "Verification email resent successfully"}, status=status.HTTP_200_OK)
+
+class LoginApi(APIView):
+    def post(self, request):
+        serializer = UserLoginSerializer(data=request.data)
+        if serializer.is_valid():
+            username = serializer.validated_data.get('username')
+            password = serializer.validated_data.get('password')
+
+            try:
+                user = User.objects.get(username=username)
+            except User.DoesNotExist:
+                return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+            if not user.check_password(password):
+                return Response({"error": "Invalid credentials"}, status=status.HTTP_400_BAD_REQUEST)
+
+            token, created = Token.objects.get_or_create(user=user)
+
+            # Check if UserProfile exists for the user
+            if hasattr(user, 'profile'):
+                return Response({"type": "user", "token": token.key}, status=status.HTTP_200_OK)
+            # Check if CompanyProfile exists for the user
+            elif hasattr(user, 'company_profile'):
+                return Response({"type": "company", "token": token.key}, status=status.HTTP_200_OK)
+            else:
+                return Response({"error": "User profile not found"}, status=status.HTTP_400_BAD_REQUEST)
+
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
