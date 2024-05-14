@@ -32,3 +32,8 @@ class SignupSerializer(serializers.ModelSerializer):
         user.save()
         
         return user
+    
+class SocialSignupSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+    account_type = serializers.ChoiceField(choices=['user', 'Company'])
+    first_name = serializers.CharField()

@@ -1,5 +1,5 @@
-from Auth.models import UserVerification
-from .serializers import ResendEmailSerializer, SignupSerializer, UserLoginSerializer, VerificationSerializer
+from Auth.models import SocialAccount, UserVerification
+from .serializers import ResendEmailSerializer, SignupSerializer, SocialSignupSerializer, UserLoginSerializer, VerificationSerializer
 from django.contrib.auth.models import User
 from rest_framework import status
 from rest_framework.response import Response
@@ -185,3 +185,47 @@ class LoginApi(APIView):
                 return Response({"error": "User profile not found"}, status=status.HTTP_400_BAD_REQUEST)
 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class SocialSignupView(APIView):
+    def post(self, request):
+        serializer = SocialSignupSerializer(data=request.data)
+        if serializer.is_valid():
+            user_data = serializer.validated_data
+            account_type = user_data['account_type']
+            email = user_data['email']
+
+            # Check if user already exists
+            try:
+                print("here")
+                user = User.objects.get(email=email)
+                token, created = Token.objects.get_or_create(user=user)
+                print("here")
+                # Check if UserProfile or CompanyProfile exists for the user
+                if UserProfile.objects.filter(user=user).exists():
+                    print("i am here")
+                    return Response({"type": "user", "token": token.key}, status=status.HTTP_200_OK)
+                elif CompanyProfile.objects.filter(user=user).exists():
+                    return Response({"type": "company", "token": token.key}, status=status.HTTP_200_OK)
+
+            except User.DoesNotExist:
+                # Create User
+                user = User.objects.create_user(
+                    username=email,  # Using email as username
+                    email=email,
+                    first_name=user_data['first_name'],
+                    password=''  # You can set a default password or generate one
+                )
+                user.save()
+
+                # Create UserProfile based on account type
+                if account_type == 'user':
+                    UserProfile.objects.create(user=user)
+                elif account_type == 'Company':
+                    CompanyProfile.objects.create(user=user)
+
+                token, created = Token.objects.get_or_create(user=user)
+
+                return Response({"type": account_type, "token": token.key}, status=status.HTTP_201_CREATED)
+
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
