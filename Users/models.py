@@ -19,7 +19,7 @@ class UserProfile(models.Model):
     profile_pic = models.ImageField(null=True, blank=True, upload_to=user_profile_pic_directory_path)
     birth_date = models.DateField(blank=True, null=True)
     phone_number = models.CharField(max_length=20, blank=True, null=True)
-    gender = models.CharField(max_length=10, choices=(('male', 'Male'), ('female', 'Female'), ('other', 'Other')), blank=True, null=True)
+    gender = models.CharField(max_length=10, choices=(('Male', 'Male'), ('Female', 'Female'), ('other', 'Other')), blank=True, null=True)
     cv = models.FileField(upload_to=user_directory_path, blank=True, null=True)
 
     def __str__(self):
