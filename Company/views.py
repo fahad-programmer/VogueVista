@@ -6,7 +6,7 @@ from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from .models import CompanyProfile
 
-class UserProfileUpdateView(APIView):
+class CompanyProfileUpdateView(APIView):
     """
     API View to update the user profile.
     Requires TokenAuthentication for user authentication.
@@ -38,5 +38,5 @@ class UserProfileUpdateView(APIView):
         serializer = CompanyProfileSerializer(company_profile, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
-            return Response(serializer.data, status=status.HTTP_200_OK)
+            return Response({"success":"Profile Updated"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
