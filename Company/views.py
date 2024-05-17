@@ -1,10 +1,11 @@
 # views.py
 from rest_framework.views import APIView
-from .serializers import CompanyProfileSerializer
+from .serializers import CompanyProfileSerializer, JobSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-from .models import CompanyProfile
+from .models import CompanyProfile, Job
+from rest_framework.generics import ListAPIView
 
 class CompanyProfileUpdateView(APIView):
     """
@@ -40,3 +41,7 @@ class CompanyProfileUpdateView(APIView):
             serializer.save()
             return Response({"success":"Profile Updated"}, status=status.HTTP_200_OK)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+    
+class JobListView(ListAPIView):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer

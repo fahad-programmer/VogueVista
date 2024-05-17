@@ -1,11 +1,11 @@
 from rest_framework.views import APIView
+
+from Company.models import CompanyProfile
 from .serializers import UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from .models import UserProfile
-from django.views.decorators.csrf import csrf_exempt
-
 class UserProfileUpdateView(APIView):
     """
     API View to update the user profile.
@@ -41,3 +41,21 @@ class UserProfileUpdateView(APIView):
             return Response({"success": "Profile Updated"}, status=status.HTTP_200_OK)
         print(serializer.errors) 
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ProfileInfo(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        current_user = request.user
+        first_name = current_user.first_name
+        
+        # Check if the user has a CompanyProfile or UserProfile
+        if CompanyProfile.objects.filter(user=current_user).exists():
+            profile = CompanyProfile.objects.get(user=current_user)
+            profile_pic_url = profile.logo.url
+            return Response({"name": first_name, "profile_pic": profile_pic_url}, status=status.HTTP_200_OK)
+        else:
+            profile = UserProfile.objects.get(user=current_user)
+            profile_pic_url = profile.profile_pic.url
+            return Response({"name": first_name, "profile_pic": profile_pic_url}, status=status.HTTP_200_OK)
