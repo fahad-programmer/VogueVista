@@ -1,11 +1,12 @@
 # views.py
 from rest_framework.views import APIView
-from .serializers import CompanyProfileSerializer, JobSerializer
+from .serializers import CompanyProfileSerializer, JobDataSerializer, JobSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from .models import CompanyProfile, Job
 from rest_framework.generics import ListAPIView
+from rest_framework.generics import RetrieveAPIView, CreateAPIView
 
 class CompanyProfileUpdateView(APIView):
     """
@@ -45,3 +46,53 @@ class CompanyProfileUpdateView(APIView):
 class JobListView(ListAPIView):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
+
+
+class JobDetailView(RetrieveAPIView):
+    queryset = Job.objects.all()
+    serializer_class = JobDataSerializer
+    lookup_field = 'id'
+
+
+from rest_framework.generics import CreateAPIView
+from rest_framework.response import Response
+from rest_framework import status
+from .models import Job, CompanyProfile
+from .serializers import JobSerializer
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.exceptions import PermissionDenied
+
+class JobCreateAPIView(CreateAPIView):
+    queryset = Job.objects.all()
+    serializer_class = JobSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def perform_create(self, serializer):
+        """
+        Perform create operation for a new object.
+
+        Args:
+        serializer: Serializer instance for the object to be created.
+
+        Returns:
+        None
+        """
+        user = self.request.user
+        companyProfile = CompanyProfile.objects.get(user=user)
+        serializer.save(company=companyProfile)
+
+    def create(self, request, *args, **kwargs):
+        """
+        Create a new object instance and return a custom response.
+
+        Args:
+        request: The HTTP request instance.
+        *args: Additional positional arguments.
+        **kwargs: Additional keyword arguments.
+
+        Returns:
+        Response: A DRF Response instance with a custom success message.
+        """
+        response = super().create(request, *args, **kwargs)
+        return Response({"success": "Job posted successfully"}, status=status.HTTP_200_OK)

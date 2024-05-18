@@ -12,11 +12,58 @@ class CompanyProfileSerializer(serializers.ModelSerializer):
 
 class JobSerializer(serializers.ModelSerializer):
     days_since_posted = serializers.SerializerMethodField()
+    company_name = serializers.SerializerMethodField()
+    logo_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Job
-        fields = '__all__'  # Includes all fields from the Job model plus the days_since_posted
+        fields = ["id", "title", "description", "job_type", "location", "experience", "salary", "card_color", "company_name", "logo_url", "days_since_posted"]
 
     def get_days_since_posted(self, obj):
         """Serializer method field to access the days_since_posted method of the Job model."""
         return obj.days_since_posted()
+
+    def get_company_name(self, obj):
+        """Serializer method field to access the company name from the CompanyProfile model."""
+        return obj.company.company_name if obj.company else None
+
+    def get_logo_url(self, obj):
+        """Serializer method field to access the logo URL from the CompanyProfile model."""
+        if obj.company and obj.company.logo:
+            request = self.context.get('request')
+            logo_url = obj.company.logo.url
+            return logo_url
+        return None
+    
+
+
+class JobDataSerializer(serializers.ModelSerializer):
+    days_since_posted = serializers.SerializerMethodField()
+    company_name = serializers.SerializerMethodField()
+    logo_url = serializers.SerializerMethodField()
+
+    class Meta:
+        model = Job
+        fields = "__all__"
+
+    def get_days_since_posted(self, obj):
+        """Serializer method field to access the days_since_posted method of the Job model."""
+        return obj.days_since_posted()
+
+    def get_company_name(self, obj):
+        """Serializer method field to access the company name from the CompanyProfile model."""
+        return obj.company.company_name if obj.company else None
+
+    def get_logo_url(self, obj):
+        """Serializer method field to access the logo URL from the CompanyProfile model."""
+        if obj.company and obj.company.logo:
+            request = self.context.get('request')
+            logo_url = obj.company.logo.url
+            return logo_url
+        return None
+    
+
+class JobCreateSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Job
+        exclude = ('company',)  # Exclude company from being required in the request
