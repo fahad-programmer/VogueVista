@@ -80,7 +80,10 @@ class JobCreateAPIView(CreateAPIView):
         """
         user = self.request.user
         companyProfile = CompanyProfile.objects.get(user=user)
-        serializer.save(company=companyProfile)
+        try:
+            serializer.save(company=companyProfile)
+        except Exception as e:
+            print(serializer.errors)
 
     def create(self, request, *args, **kwargs):
         """

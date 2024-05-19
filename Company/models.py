@@ -19,18 +19,10 @@ class CompanyProfile(models.Model):
 
 class Job(models.Model):
     # Job types can be defined as a tuple of tuples, where the first value in each tuple is the value to be stored in the database and the second value is the human-readable name
-    JOB_TYPES = (
-        ('full_time', 'Full Time'),
-        ('part_time', 'Part Time'),
-        ('contract', 'Contract'),
-        ('internship', 'Internship'),
-        ('temporary', 'Temporary'),
-    )
-
     company = models.ForeignKey(CompanyProfile, on_delete=models.CASCADE, related_name='jobs')
     title = models.CharField(max_length=255)
     description = models.TextField()
-    job_type = models.CharField(max_length=50, choices=JOB_TYPES)
+    job_type = models.CharField(max_length=50)
     location = models.CharField(max_length=255)
     experience = models.CharField(max_length=255)  
     salary = models.CharField(max_length=255)  
