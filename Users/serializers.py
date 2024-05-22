@@ -12,7 +12,7 @@ class PDFBase64File(Base64FileField):
     def get_file_extension(self, filename, decoded_file):
         try:
             PyPDF2.PdfReader(io.BytesIO(decoded_file))
-        except Exception as e:  
+        except Exception as e:  # Adjusted exception handling
             print(e)
         else:
             return 'pdf'
