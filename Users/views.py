@@ -1,11 +1,13 @@
 from rest_framework.views import APIView
 
 from Company.models import CompanyProfile
-from .serializers import UserProfileSerializer
+from .serializers import UserProfileSerializer, SavedJobsSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-from .models import UserProfile
+from .models import UserProfile, SavedJobs
+from rest_framework.generics import ListAPIView
+
 class UserProfileUpdateView(APIView):
     """
     API View to update the user profile.
@@ -59,3 +61,15 @@ class ProfileInfo(APIView):
             profile = UserProfile.objects.get(user=current_user)
             profile_pic_url = profile.profile_pic.url
             return Response({"name": first_name, "profile_pic": profile_pic_url}, status=status.HTTP_200_OK)
+        
+class SavedJobsListView(ListAPIView):
+    serializer_class = SavedJobsSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the jobs
+        for the currently authenticated user.
+        """
+        user = self.request.user
+        return SavedJobs.objects.filter(user=user)

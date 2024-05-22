@@ -17,7 +17,7 @@ class JobSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Job
-        fields = ["id", "title", "description", "job_type", "location", "experience", "salary", "card_color", "company_name", "logo_url", "days_since_posted"]
+        fields = ["id", "title", "description", "job_type", "location", "experience", "requirements", "salary", "card_color", "company_name", "logo_url", "role", "days_since_posted"]
 
     def get_days_since_posted(self, obj):
         """Serializer method field to access the days_since_posted method of the Job model."""

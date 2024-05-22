@@ -46,4 +46,8 @@ class JobApplication(models.Model):
     def __str__(self):
         return f'{self.user_profile.user.username} - {self.job.title}'
 
-    # Additional methods can be added here. For example, a method to update the application status.
+
+class SavedJobs(models.Model):
+    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    job = models.ForeignKey(Job, on_delete=models.CASCADE)
+    

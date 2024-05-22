@@ -53,16 +53,6 @@ class JobDetailView(RetrieveAPIView):
     serializer_class = JobDataSerializer
     lookup_field = 'id'
 
-
-from rest_framework.generics import CreateAPIView
-from rest_framework.response import Response
-from rest_framework import status
-from .models import Job, CompanyProfile
-from .serializers import JobSerializer
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
-from rest_framework.exceptions import PermissionDenied
-
 class JobCreateAPIView(CreateAPIView):
     queryset = Job.objects.all()
     serializer_class = JobSerializer
