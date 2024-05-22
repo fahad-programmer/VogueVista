@@ -89,3 +89,19 @@ class JobCreateAPIView(CreateAPIView):
         """
         response = super().create(request, *args, **kwargs)
         return Response({"success": "Job posted successfully"}, status=status.HTTP_200_OK)
+
+
+class MyAdsListView(ListAPIView):
+    serializer_class = JobSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        """
+        This view should return a list of all the jobs
+        posted by the company of the currently authenticated user.
+        """
+        user = self.request.user
+        if hasattr(user, 'company_profile'):
+            return Job.objects.filter(company=user.company_profile)
+        else:
+            return Job.objects.none()  # Return an empty queryset if the user has no company profile
