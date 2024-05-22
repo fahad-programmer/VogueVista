@@ -180,7 +180,7 @@ class LoginApi(APIView):
                 return Response({"type": "user", "token": token.key}, status=status.HTTP_200_OK)
             # Check if CompanyProfile exists for the user
             elif hasattr(user, 'company_profile'):
-                return Response({"type": "company", "token": token.key}, status=status.HTTP_200_OK)
+                return Response({"type": "Company", "token": token.key}, status=status.HTTP_200_OK)
             else:
                 return Response({"error": "User profile not found"}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -196,16 +196,13 @@ class SocialSignupView(APIView):
 
             # Check if user already exists
             try:
-                print("here")
                 user = User.objects.get(email=email)
                 token, created = Token.objects.get_or_create(user=user)
-                print("here")
                 # Check if UserProfile or CompanyProfile exists for the user
                 if UserProfile.objects.filter(user=user).exists():
-                    print("i am here")
                     return Response({"type": "user", "token": token.key}, status=status.HTTP_200_OK)
                 elif CompanyProfile.objects.filter(user=user).exists():
-                    return Response({"type": "company", "token": token.key}, status=status.HTTP_200_OK)
+                    return Response({"type": "Company", "token": token.key}, status=status.HTTP_200_OK)
 
             except User.DoesNotExist:
                 # Create User
