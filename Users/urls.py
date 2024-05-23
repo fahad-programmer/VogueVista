@@ -1,6 +1,6 @@
 # urls.py
 from django.urls import path
-from .views import UserProfileUpdateView, ProfileInfo, SavedJobsListView, UserProfileView, CreateJobApplication, UserJobApplicationsList
+from .views import NotificationListView, UserProfileUpdateView, ProfileInfo, SavedJobsListView, UserProfileView, CreateJobApplication, UserJobApplicationsList
 
 urlpatterns = [
     path("profileUpdate", UserProfileUpdateView.as_view(), name="UserProfileUpdate"),
@@ -8,5 +8,6 @@ urlpatterns = [
     path('saved-jobs', SavedJobsListView.as_view(), name='saved-jobs'),
     path('user-profile', UserProfileView.as_view(), name='user-profile'),
     path("apply-job", CreateJobApplication.as_view(), name="createJobApplication"),
-    path("my-jobs-application", UserJobApplicationsList.as_view(), name="jobs-list")
+    path("my-jobs-application", UserJobApplicationsList.as_view(), name="jobs-list"),
+    path('notifications', NotificationListView.as_view(), name='notification_list'),
 ]

@@ -1,11 +1,11 @@
 from rest_framework.views import APIView
 
 from Company.models import CompanyProfile
-from .serializers import JobApplicationSerializer, UserProfileDataSerializer, UserProfileSerializer
+from .serializers import JobApplicationSerializer, NotificationSerializer, UserProfileDataSerializer, UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-from .models import JobApplication, UserProfile
+from .models import JobApplication, Notification, UserProfile
 from rest_framework.generics import ListAPIView, CreateAPIView
 from Company.serializers import JobSerializer
 from Company.models import Job
@@ -118,3 +118,11 @@ class UserJobApplicationsList(ListAPIView):
         user = self.request.user
         userProfile = UserProfile.objects.get(user=user)
         return JobApplication.objects.filter(user_profile=userProfile)
+
+
+class NotificationListView(ListAPIView):
+    serializer_class = NotificationSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        return Notification.objects.filter(recipient=self.request.user).order_by('-created_at')
