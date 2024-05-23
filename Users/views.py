@@ -1,7 +1,7 @@
 from rest_framework.views import APIView
 
 from Company.models import CompanyProfile
-from .serializers import UserProfileSerializer
+from .serializers import UserProfileDataSerializer, UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -71,3 +71,14 @@ class SavedJobsListView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Job.objects.filter(savedjobs__user=user)
+    
+class UserProfileView(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        try:
+            user_profile = UserProfile.objects.get(user=request.user)
+            serializer = UserProfileDataSerializer(user_profile)
+            return Response(serializer.data)
+        except UserProfile.DoesNotExist:
+            return Response({'error': 'UserProfile does not exist'}, status=404)
