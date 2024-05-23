@@ -1,14 +1,15 @@
 from rest_framework.views import APIView
 
 from Company.models import CompanyProfile
-from .serializers import UserProfileDataSerializer, UserProfileSerializer
+from .serializers import JobApplicationSerializer, UserProfileDataSerializer, UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-from .models import UserProfile
-from rest_framework.generics import ListAPIView
+from .models import JobApplication, UserProfile
+from rest_framework.generics import ListAPIView, CreateAPIView
 from Company.serializers import JobSerializer
 from Company.models import Job
+
 
 class UserProfileUpdateView(APIView):
     """
@@ -82,3 +83,38 @@ class UserProfileView(APIView):
             return Response(serializer.data)
         except UserProfile.DoesNotExist:
             return Response({'error': 'UserProfile does not exist'}, status=404)
+        
+
+class CreateJobApplication(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request, *args, **kwargs):
+        job_id = request.data.get('job_id')
+        user = request.user
+        try:
+            job = Job.objects.get(id=job_id)
+            userProfile = UserProfile.objects.get(user=user)
+
+            # Check if the user has already applied for this job
+            if JobApplication.objects.filter(user_profile=userProfile, job=job).exists():
+                return Response({"error": "You have already applied for this job"}, status=status.HTTP_400_BAD_REQUEST)
+
+            # Create a new job application
+            JobApplication.objects.create(user_profile=userProfile, job=job)
+            return Response({"success": "Job Application Submitted Successfully"}, status=status.HTTP_200_OK)
+
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found"}, status=status.HTTP_404_NOT_FOUND)
+        except UserProfile.DoesNotExist:
+            return Response({"error": "User profile not found"}, status=status.HTTP_404_NOT_FOUND)
+
+
+
+class UserJobApplicationsList(ListAPIView):
+    serializer_class = JobApplicationSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        user = self.request.user
+        userProfile = UserProfile.objects.get(user=user)
+        return JobApplication.objects.filter(user_profile=userProfile)

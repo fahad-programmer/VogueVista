@@ -2,7 +2,7 @@
 import io
 import PyPDF2
 from rest_framework import serializers
-from .models import UserProfile
+from .models import JobApplication, UserProfile
 from drf_extra_fields.fields import Base64ImageField, Base64FileField
 
 
@@ -31,3 +31,7 @@ class UserProfileDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
         fields = ['profile_pic','birth_date', 'phone_number', 'gender', 'cv', 'email']
+
+class JobApplicationSerializer(serializers.Serializer):
+    job_id = serializers.CharField(max_length=50)
+
