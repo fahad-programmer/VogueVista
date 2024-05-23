@@ -16,3 +16,17 @@ def create_job_application_notification(sender, instance, created, **kwargs):
             recipient=instance.job.company.user,
             message=f'{instance.user_profile.user.username} has applied for {instance.job.title}.'
         )
+
+
+@receiver(post_save, sender=JobApplication)
+def job_application_status_change(sender, instance, **kwargs):
+    if kwargs.get('created', False):
+        # Skip notifications when the object is first created
+        return
+
+    # Check if the status has changed
+    if instance.tracker.has_changed('status'):
+        Notification.objects.create(
+            recipient=instance.user_profile.user,
+            message=f'Your application for {instance.job.title} has been {instance.status}.'
+        )

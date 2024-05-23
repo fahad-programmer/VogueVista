@@ -2,9 +2,8 @@ from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
 from Company.models import Job
+from model_utils import FieldTracker
 
-
-# If you're using a custom user model, replace 'User' with your custom model.
 
 def user_directory_path(instance, filename):
     # file will be uploaded to MEDIA_ROOT/user_<id>/<filename>
@@ -41,6 +40,7 @@ class JobApplication(models.Model):
     job = models.ForeignKey(Job, on_delete=models.CASCADE, related_name='applications')
     user_profile = models.ForeignKey(UserProfile, on_delete=models.CASCADE, related_name='applications')
     status = models.CharField(max_length=50, choices=STATUS_CHOICES, default='submitted')
+    tracker = FieldTracker(fields=['status'])
     date_applied = models.DateTimeField(default=timezone.now)
 
     def __str__(self):
