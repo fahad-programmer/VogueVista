@@ -27,10 +27,10 @@ class UserProfileSerializer(serializers.ModelSerializer):
 
 class UserProfileDataSerializer(serializers.ModelSerializer):
     email = serializers.EmailField(source='user.email')
-
+    name  = serializers.CharField(source='user.first_name', max_length=100)
     class Meta:
         model = UserProfile
-        fields = ['profile_pic','birth_date', 'phone_number', 'gender', 'cv', 'email']
+        fields = ['name', 'profile_pic','birth_date', 'phone_number', 'gender', 'cv', 'email']
 
 class JobApplicationSerializer(serializers.Serializer):
     job_id = serializers.CharField(max_length=50)
