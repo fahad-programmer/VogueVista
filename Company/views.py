@@ -1,6 +1,8 @@
 # views.py
 from rest_framework.views import APIView
-from .serializers import CompanyProfileSerializer, JobDataSerializer, JobSerializer
+
+from Users.models import JobApplication
+from .serializers import CompanyProfileSerializer, JobApplicationSerializer, JobDataSerializer, JobSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -105,3 +107,14 @@ class MyAdsListView(ListAPIView):
             return Job.objects.filter(company=user.company_profile)
         else:
             return Job.objects.none()  # Return an empty queryset if the user has no company profile
+        
+class JobApplicantsListView(ListAPIView):
+    serializer_class = JobApplicationSerializer
+    authentication_classes = [TokenAuthentication]
+
+    def get_queryset(self):
+        job_id = self.kwargs['job_id']
+        job = Job.objects.get(id=job_id)
+
+        # Check if the current user is associated with the company that posted the job
+        return JobApplication.objects.filter(job=job).select_related('user_profile__user')

@@ -2,6 +2,8 @@ from rest_framework import serializers
 from .models import CompanyProfile
 from drf_extra_fields.fields import Base64ImageField
 from .models import Job
+from Users.models import JobApplication, UserProfile
+
 
 class CompanyProfileSerializer(serializers.ModelSerializer):
 
@@ -67,3 +69,11 @@ class JobCreateSerializer(serializers.ModelSerializer):
     class Meta:
         model = Job
         exclude = ('company',)  # Exclude company from being required in the request
+
+class JobApplicationSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(source='user_profile.user.id')
+    username = serializers.CharField(source='user_profile.user.username')  # Adjust the source to match your user model
+
+    class Meta:
+        model = JobApplication
+        fields = ['id', 'username', 'status']  # Directly include 'username' and 'status'
