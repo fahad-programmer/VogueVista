@@ -1,3 +1,4 @@
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 
 from Company.models import CompanyProfile
@@ -126,3 +127,13 @@ class NotificationListView(ListAPIView):
 
     def get_queryset(self):
         return Notification.objects.filter(recipient=self.request.user).order_by('-created_at')
+    
+class UserProfileDetailView(APIView):
+    """
+    Retrieve UserProfile data by user ID.
+    """
+    def get(self, request, user_id):
+        # Retrieve the UserProfile instance using the user_id
+        user_profile = get_object_or_404(UserProfile, user__id=user_id)
+        serializer = UserProfileSerializer(user_profile)
+        return Response(serializer.data, status=status.HTTP_200_OK)
