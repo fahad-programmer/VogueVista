@@ -77,3 +77,4 @@ class JobApplicationSerializer(serializers.ModelSerializer):
     class Meta:
         model = JobApplication
         fields = ['id', 'username', 'status']  # Directly include 'username' and 'status'
+

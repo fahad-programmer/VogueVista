@@ -48,8 +48,11 @@ class JobApplication(models.Model):
 
 
 class SavedJobs(models.Model):
-    user = models.OneToOneField(User, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     job = models.ForeignKey(Job, on_delete=models.CASCADE)
+
+    def __str__(self) -> str:
+        return f"{self.user.first_name} has stored job of{self.job.title}"
     
 
 class Notification(models.Model):

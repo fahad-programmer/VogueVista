@@ -1,15 +1,15 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
-
 from Company.models import CompanyProfile
 from .serializers import JobApplicationSerializer, NotificationSerializer, UserProfileDataSerializer, UserProfileSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
-from .models import JobApplication, Notification, UserProfile
+from .models import JobApplication, Notification, UserProfile, SavedJobs
 from rest_framework.generics import ListAPIView, CreateAPIView
 from Company.serializers import JobSerializer
 from Company.models import Job
+from django.db.models import Q
 
 
 class UserProfileUpdateView(APIView):
@@ -137,3 +137,40 @@ class UserProfileDetailView(APIView):
         user_profile = get_object_or_404(UserProfile, user__id=user_id)
         serializer = UserProfileDataSerializer(user_profile)
         return Response(serializer.data, status=status.HTTP_200_OK)
+    
+class SaveJobView(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def post(self, request):
+        user = request.user
+        job_id = request.data.get('job_id')
+        try:
+            job = Job.objects.get(id=job_id)
+        except Job.DoesNotExist:
+            return Response({"error": "Job not found"}, status=status.HTTP_404_NOT_FOUND)
+
+        if SavedJobs.objects.filter(user=user, job=job).exists():
+            return Response({"error": "Job is already saved"}, status=status.HTTP_400_BAD_REQUEST)
+
+        saved_job = SavedJobs.objects.create(user=user, job=job)
+        serializer = JobSerializer(saved_job)
+        return Response({"success":"Job Saved Successfully"}, status=status.HTTP_201_CREATED)
+
+
+
+class JobSearchView(APIView):
+    def get(self, request, *args, **kwargs):
+        query = request.data.get('query', '')
+        if query:
+            jobs = Job.objects.filter(
+                Q(title__icontains=query) | 
+                Q(description__icontains=query) |
+                Q(location__icontains=query) |
+                Q(experience__icontains=query) |
+                Q(requirements__icontains=query) |
+                Q(role__icontains=query)
+            )
+            serializer = JobSerializer(jobs, many=True)
+            return Response(serializer.data)
+        else:
+            return Response({"message": "Please provide a search term."})
