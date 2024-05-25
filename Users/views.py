@@ -135,5 +135,5 @@ class UserProfileDetailView(APIView):
     def get(self, request, user_id):
         # Retrieve the UserProfile instance using the user_id
         user_profile = get_object_or_404(UserProfile, user__id=user_id)
-        serializer = UserProfileSerializer(user_profile)
+        serializer = UserProfileDataSerializer(user_profile)
         return Response(serializer.data, status=status.HTTP_200_OK)

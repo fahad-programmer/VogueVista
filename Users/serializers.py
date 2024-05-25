@@ -42,7 +42,7 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = ['id', 'message', 'read', 'created_at']
 
 
-class UserProfileSerializer(serializers.ModelSerializer):
+class UserProfileDataSerializer(serializers.ModelSerializer):
     class Meta:
         model = UserProfile
-        fields = ['user', 'profile_pic', 'birth_date', 'phone_number', 'gender', 'cv']  # Adjust fields as needed
+        fields = ['user', 'profile_pic', 'birth_date', 'phone_number', 'gender', 'cv'] 
