@@ -4,7 +4,7 @@ import PyPDF2
 from rest_framework import serializers
 from .models import JobApplication, Notification, UserProfile
 from drf_extra_fields.fields import Base64ImageField, Base64FileField
-
+from Company.serializers import JobSerializer
 
 class PDFBase64File(Base64FileField):
     ALLOWED_TYPES = ['pdf']
@@ -42,7 +42,15 @@ class NotificationSerializer(serializers.ModelSerializer):
         fields = ['id', 'message', 'read', 'created_at']
 
 
-class UserProfileDataSerializer(serializers.ModelSerializer):
+class AppliedJobSerializer(serializers.ModelSerializer):
+    job = JobSerializer(read_only=True)  # Nested serialization
+
     class Meta:
-        model = UserProfile
-        fields = ['user', 'profile_pic', 'birth_date', 'phone_number', 'gender', 'cv'] 
+        model = JobApplication
+        fields = ['job']  # Include 'job' to serialize job details
+
+    def to_representation(self, instance):
+        # Use the JobSerializer to represent the 'job' field directly
+        representation = super().to_representation(instance)
+        job = representation.pop('job', None)  # Remove the 'job' key and get its value
+        return job if job else {}

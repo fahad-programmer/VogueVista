@@ -1,6 +1,6 @@
 # views.py
+from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
-
 from Users.models import JobApplication
 from .serializers import CompanyProfileSerializer, JobApplicationSerializer, JobDataSerializer, JobSerializer
 from rest_framework.response import Response
@@ -118,3 +118,20 @@ class JobApplicantsListView(ListAPIView):
 
         # Check if the current user is associated with the company that posted the job
         return JobApplication.objects.filter(job=job).select_related('user_profile__user')
+
+
+class UpdateJobApplicationStatus(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def patch(self, request, application_id):
+        application = get_object_or_404(JobApplication, id=application_id)
+        job_status = request.data.get('status')
+        if job_status not in ['accepted', 'rejected']:
+            return Response({"error": "Invalid status"}, status=status.HTTP_400_BAD_REQUEST)
+        
+        if application.status == job_status:
+            return Response({"error":"Already Changed The Status Of The Job"}, status=status.HTTP_400_BAD_REQUEST)
+
+        application.status = job_status
+        application.save()
+        return Response({"message": "Job application status updated"}, status=status.HTTP_200_OK)

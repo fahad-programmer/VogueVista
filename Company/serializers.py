@@ -71,10 +71,12 @@ class JobCreateSerializer(serializers.ModelSerializer):
         exclude = ('company',)  # Exclude company from being required in the request
 
 class JobApplicationSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(source='user_profile.user.id')
-    username = serializers.CharField(source='user_profile.user.username')  # Adjust the source to match your user model
+    user_id = serializers.CharField(source='user_profile.user.id')
+    username = serializers.CharField(source='user_profile.user.first_name')  # Adjust the source to match your user model
+    profile_pic = serializers.CharField(source='user_profile.profile_pic')
+
 
     class Meta:
         model = JobApplication
-        fields = ['id', 'username', 'status']  # Directly include 'username' and 'status'
+        fields = ['id','user_id', 'username', 'status', 'profile_pic']  # Directly include 'username' and 'status'
 

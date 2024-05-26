@@ -1,12 +1,12 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from Company.models import CompanyProfile
-from .serializers import JobApplicationSerializer, NotificationSerializer, UserProfileDataSerializer, UserProfileSerializer
+from .serializers import JobApplicationSerializer, NotificationSerializer, UserProfileDataSerializer, UserProfileSerializer, AppliedJobSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
 from .models import JobApplication, Notification, UserProfile, SavedJobs
-from rest_framework.generics import ListAPIView, CreateAPIView
+from rest_framework.generics import ListAPIView
 from Company.serializers import JobSerializer
 from Company.models import Job
 from django.db.models import Q
@@ -45,7 +45,7 @@ class UserProfileUpdateView(APIView):
         if serializer.is_valid():
             serializer.save()
             return Response({"success": "Profile Updated"}, status=status.HTTP_200_OK)
-        print(serializer.errors) 
+        print(serializer.errors)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -55,7 +55,7 @@ class ProfileInfo(APIView):
     def get(self, request):
         current_user = request.user
         first_name = current_user.first_name
-        
+
         # Check if the user has a CompanyProfile or UserProfile
         if CompanyProfile.objects.filter(user=current_user).exists():
             profile = CompanyProfile.objects.get(user=current_user)
@@ -65,7 +65,7 @@ class ProfileInfo(APIView):
             profile = UserProfile.objects.get(user=current_user)
             profile_pic_url = profile.profile_pic.url
             return Response({"name": first_name, "profile_pic": profile_pic_url}, status=status.HTTP_200_OK)
-        
+
 class SavedJobsListView(ListAPIView):
     serializer_class = JobSerializer
     authentication_classes = [TokenAuthentication]
@@ -73,7 +73,7 @@ class SavedJobsListView(ListAPIView):
     def get_queryset(self):
         user = self.request.user
         return Job.objects.filter(savedjobs__user=user)
-    
+
 class UserProfileView(APIView):
     authentication_classes = [TokenAuthentication]
 
@@ -84,7 +84,7 @@ class UserProfileView(APIView):
             return Response(serializer.data)
         except UserProfile.DoesNotExist:
             return Response({'error': 'UserProfile does not exist'}, status=404)
-        
+
 
 class CreateJobApplication(APIView):
     authentication_classes = [TokenAuthentication]
@@ -112,7 +112,7 @@ class CreateJobApplication(APIView):
 
 
 class UserJobApplicationsList(ListAPIView):
-    serializer_class = JobApplicationSerializer
+    serializer_class = AppliedJobSerializer
     authentication_classes = [TokenAuthentication]
 
     def get_queryset(self):
@@ -127,7 +127,7 @@ class NotificationListView(ListAPIView):
 
     def get_queryset(self):
         return Notification.objects.filter(recipient=self.request.user).order_by('-created_at')
-    
+
 class UserProfileDetailView(APIView):
     """
     Retrieve UserProfile data by user ID.
@@ -137,7 +137,7 @@ class UserProfileDetailView(APIView):
         user_profile = get_object_or_404(UserProfile, user__id=user_id)
         serializer = UserProfileDataSerializer(user_profile)
         return Response(serializer.data, status=status.HTTP_200_OK)
-    
+
 class SaveJobView(APIView):
     authentication_classes = [TokenAuthentication]
 
@@ -159,11 +159,11 @@ class SaveJobView(APIView):
 
 
 class JobSearchView(APIView):
-    def get(self, request, *args, **kwargs):
+    def post(self, request, *args, **kwargs):
         query = request.data.get('query', '')
         if query:
             jobs = Job.objects.filter(
-                Q(title__icontains=query) | 
+                Q(title__icontains=query) |
                 Q(description__icontains=query) |
                 Q(location__icontains=query) |
                 Q(experience__icontains=query) |
