@@ -2,7 +2,7 @@
 from django.shortcuts import get_object_or_404
 from rest_framework.views import APIView
 from Users.models import JobApplication
-from .serializers import CompanyProfileSerializer, JobApplicationSerializer, JobDataSerializer, JobSerializer
+from .serializers import CompanyProfileData, CompanyProfileSerializer, JobApplicationSerializer, JobDataSerializer, JobSerializer
 from rest_framework.response import Response
 from rest_framework import status
 from rest_framework.authentication import TokenAuthentication
@@ -135,3 +135,15 @@ class UpdateJobApplicationStatus(APIView):
         application.status = job_status
         application.save()
         return Response({"Success": "Job application status updated"}, status=status.HTTP_200_OK)
+
+
+class CompanyProfileApi(APIView):
+    authentication_classes = [TokenAuthentication]
+
+    def get(self, request):
+        try:
+            user_profile = CompanyProfile.objects.get(user=request.user)
+            serializer = CompanyProfileData(user_profile)
+            return Response(serializer.data)
+        except CompanyProfile.DoesNotExist:
+            return Response({'error': 'UserProfile does not exist'}, status=404)

@@ -1,7 +1,11 @@
 from django.urls import path
-from .views import CompanyProfileUpdateView, JobApplicantsListView, JobListView, JobDetailView, JobCreateAPIView, MyAdsListView, UpdateJobApplicationStatus
+from .views import CompanyProfileApi, CompanyProfileUpdateView, JobApplicantsListView, JobListView, JobDetailView, JobCreateAPIView, MyAdsListView, UpdateJobApplicationStatus
 
 urlpatterns = [
+
+    #url for getting company profile
+    path("companyProfile", CompanyProfileApi.as_view(), name="companyView"),
+
     # URL for updating company profile
     path("profileUpdate",CompanyProfileUpdateView.as_view()),
 

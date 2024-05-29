@@ -80,3 +80,11 @@ class JobApplicationSerializer(serializers.ModelSerializer):
         model = JobApplication
         fields = ['id','user_id', 'username', 'status', 'profile_pic']  # Directly include 'username' and 'status'
 
+
+class CompanyProfileData(serializers.ModelSerializer):
+
+    email = serializers.CharField(source='CompanyProfile.user.first_name')
+
+    class Meta:
+        model = CompanyProfile
+        fields = ['logo', 'location', 'phone_number', "company_name", "email"]
