@@ -18,7 +18,7 @@ urlpatterns = [
     path('my-ads', MyAdsListView.as_view(), name='my-ads'),
 
     # URL for listing all applicants of a specific job by its ID
-    path('jobs/<int:job_id>/applicants/', JobApplicantsListView.as_view(), name='job-applicants-list'),
+    path('jobs/<int:job_id>/applicants', JobApplicantsListView.as_view(), name='job-applicants-list'),
 
     # URL for updating the status of a specific application by its ID
     path('applications/<int:application_id>/status', UpdateJobApplicationStatus.as_view(), name='update_application_status'),

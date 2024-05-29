@@ -134,4 +134,4 @@ class UpdateJobApplicationStatus(APIView):
 
         application.status = job_status
         application.save()
-        return Response({"message": "Job application status updated"}, status=status.HTTP_200_OK)
+        return Response({"Success": "Job application status updated"}, status=status.HTTP_200_OK)

@@ -214,10 +214,11 @@ class SocialSignupView(APIView):
                 )
                 user.save()
 
+
                 # Create UserProfile based on account type
                 if account_type == 'user':
                     UserProfile.objects.create(user=user)
-                elif account_type == 'Company':
+                else:
                     CompanyProfile.objects.create(user=user)
 
                 token, created = Token.objects.get_or_create(user=user)
